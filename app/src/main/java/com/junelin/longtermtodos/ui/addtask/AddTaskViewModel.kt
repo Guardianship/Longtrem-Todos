@@ -1,22 +1,20 @@
 package com.junelin.longtermtodos.ui.addtask
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.junelin.longtermtodos.data.model.Category
 import com.junelin.longtermtodos.data.model.Task
-import com.junelin.longtermtodos.data.repository.CategoryRepository
-import com.junelin.longtermtodos.data.repository.SettingsRepository
-import com.junelin.longtermtodos.data.repository.TaskRepository
-import com.junelin.longtermtodos.di.AppModule
+import com.junelin.longtermtodos.domain.usecase.GetCategoriesUseCase
+import com.junelin.longtermtodos.domain.usecase.GetTasksUseCase
+import com.junelin.longtermtodos.domain.usecase.SaveTaskUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import javax.inject.Inject
 
 data class AddTaskUiState(
     val title: String = "",
@@ -30,20 +28,20 @@ data class AddTaskUiState(
     val error: String? = null
 )
 
-class AddTaskViewModel(
-    application: Application,
-    private val savedStateHandle: SavedStateHandle
-) : AndroidViewModel(application) {
-    private val taskId: Long? = savedStateHandle.get<Long>("taskId").takeIf { it != 0L }
+@HiltViewModel
+class AddTaskViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
+    private val saveTaskUseCase: SaveTaskUseCase,
+    private val getTasksUseCase: GetTasksUseCase,
+    getCategoriesUseCase: GetCategoriesUseCase
+) : ViewModel() {
 
-    private val taskRepository = AppModule.provideTaskRepository(application)
-    private val categoryRepository = AppModule.provideCategoryRepository(application)
-    private val settingsRepository = AppModule.provideSettingsRepository(application)
+    private val taskId: Long? = savedStateHandle.get<Long>("taskId")?.takeIf { it != 0L }
 
     private val _uiState = MutableStateFlow(AddTaskUiState())
     val uiState: StateFlow<AddTaskUiState> = _uiState
 
-    val categories: StateFlow<List<Category>> = categoryRepository.getAllCategories()
+    val categories: StateFlow<List<com.junelin.longtermtodos.data.model.Category>> = getCategoriesUseCase()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
@@ -55,7 +53,7 @@ class AddTaskViewModel(
             }
         }
         viewModelScope.launch {
-            val defaultDays = settingsRepository.defaultRemindDays.first()
+            val defaultDays = saveTaskUseCase.getDefaultRemindDays()
             _uiState.value = _uiState.value.copy(remindBeforeDays = defaultDays)
         }
         if (taskId != null) {
@@ -65,7 +63,7 @@ class AddTaskViewModel(
 
     private fun loadTask(id: Long) {
         viewModelScope.launch {
-            val task = taskRepository.getTaskByIdSync(id)
+            val task = getTasksUseCase.getById(id)
             task?.let {
                 _uiState.value = _uiState.value.copy(
                     title = it.title,
@@ -131,11 +129,7 @@ class AddTaskViewModel(
                 isLunarDate = state.isLunarDate,
                 remindBeforeDays = state.remindBeforeDays
             )
-            if (taskId != null) {
-                taskRepository.updateTask(task)
-            } else {
-                taskRepository.insertTask(task)
-            }
+            saveTaskUseCase(task)
             _uiState.value = state.copy(isLoading = false, isSaved = true)
         }
     }

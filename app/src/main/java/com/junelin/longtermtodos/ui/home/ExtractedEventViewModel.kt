@@ -1,22 +1,23 @@
 package com.junelin.longtermtodos.ui.home
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.junelin.longtermtodos.data.local.dao.ExtractedEventDao
 import com.junelin.longtermtodos.data.local.entity.ExtractionStatus
 import com.junelin.longtermtodos.data.model.ExtractedEvent
 import com.junelin.longtermtodos.data.model.Task
-import com.junelin.longtermtodos.data.local.dao.ExtractedEventDao
 import com.junelin.longtermtodos.data.repository.TaskRepository
-import com.junelin.longtermtodos.di.AppModule
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ExtractedEventViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val extractedEventDao = AppModule.provideDatabase(application).extractedEventDao()
-    private val taskRepository = AppModule.provideTaskRepository(application)
+@HiltViewModel
+class ExtractedEventViewModel @Inject constructor(
+    private val extractedEventDao: ExtractedEventDao,
+    private val taskRepository: TaskRepository
+) : ViewModel() {
 
     private val _pendingEvents = MutableStateFlow<List<ExtractedEvent>>(emptyList())
     val pendingEvents: StateFlow<List<ExtractedEvent>> = _pendingEvents

@@ -37,7 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.junelin.longtermtodos.ui.addtask.components.CategorySelector
 import com.junelin.longtermtodos.ui.addtask.components.DatePickerField
 import com.junelin.longtermtodos.ui.addtask.components.VoiceInputButton
@@ -47,7 +47,7 @@ import com.junelin.longtermtodos.ui.addtask.components.VoiceInputButton
 fun AddTaskScreen(
     taskId: Long? = null,
     onBack: () -> Unit,
-    viewModel: AddTaskViewModel = viewModel()
+    viewModel: AddTaskViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val categories by viewModel.categories.collectAsState()

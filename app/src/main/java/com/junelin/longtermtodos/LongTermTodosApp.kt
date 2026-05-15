@@ -5,11 +5,13 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import dagger.hilt.android.HiltAndroidApp
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@HiltAndroidApp
 class LongTermTodosApp : Application() {
 
     override fun onCreate() {
@@ -45,6 +47,8 @@ class LongTermTodosApp : Application() {
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = getString(R.string.channel_reminder_desc)
+                setShowBadge(true)
+                enableVibration(true)
             }
 
             val persistentChannel = NotificationChannel(
@@ -53,6 +57,7 @@ class LongTermTodosApp : Application() {
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = getString(R.string.channel_persistent_desc)
+                setShowBadge(false)
             }
 
             notificationManager.createNotificationChannels(listOf(reminderChannel, persistentChannel))

@@ -3,8 +3,6 @@ package com.junelin.longtermtodos.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.junelin.longtermtodos.data.model.Task
-import com.junelin.longtermtodos.di.AppModule
 import com.junelin.longtermtodos.reminder.NotificationHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

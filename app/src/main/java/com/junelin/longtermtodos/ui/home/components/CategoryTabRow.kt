@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.junelin.longtermtodos.data.model.Category
 
@@ -26,8 +27,8 @@ fun CategoryTabRow(
 ) {
     LazyRow(
         modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         item {
             CategoryChip(
@@ -65,19 +66,22 @@ private fun CategoryChip(
         label = {
             Text(
                 text = if (icon.isNotEmpty()) "$icon $label" else label,
-                style = MaterialTheme.typography.labelLarge
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium
+                )
             )
         },
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = color.copy(alpha = 0.15f),
+            selectedContainerColor = color.copy(alpha = 0.18f),
             selectedLabelColor = color,
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+            labelColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
         border = FilterChipDefaults.filterChipBorder(
             enabled = true,
             selected = selected,
-            borderColor = if (selected) color.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant
+            borderColor = if (selected) color.copy(alpha = 0.4f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
         )
     )
 }

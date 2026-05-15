@@ -1,20 +1,16 @@
 package com.junelin.longtermtodos.widget
 
 import android.content.Context
-import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
-import androidx.glance.ImageProvider
-import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
-import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
@@ -25,10 +21,8 @@ import androidx.glance.layout.padding
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
-import com.junelin.longtermtodos.MainActivity
-import com.junelin.longtermtodos.R
-import com.junelin.longtermtodos.di.AppModule
+import com.junelin.longtermtodos.di.WidgetEntryPoint
+import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -36,8 +30,12 @@ import java.time.temporal.ChronoUnit
 class TodosGlanceWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val repository = AppModule.provideTaskRepository(context)
-        val settings = AppModule.provideSettingsRepository(context)
+        val entryPoint = EntryPointAccessors.fromApplication(
+            context,
+            WidgetEntryPoint::class.java
+        )
+        val repository = entryPoint.taskRepository()
+        val settings = entryPoint.settingsRepository()
         val days = settings.widgetDisplayDays.first()
         val tasks = repository.getUpcomingTasks(days).first().take(5)
 
@@ -49,7 +47,7 @@ class TodosGlanceWidget : GlanceAppWidget() {
 
 @Composable
 private fun WidgetContent(tasks: List<com.junelin.longtermtodos.data.model.Task>) {
-    Box(
+    androidx.glance.layout.Box(
         modifier = GlanceModifier
             .fillMaxSize()
             .background(androidx.glance.GlanceTheme.colors.background)

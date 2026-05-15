@@ -10,12 +10,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Divider
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,24 +36,38 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.junelin.longtermtodos.util.device.AutoStartUtils
+import com.junelin.longtermtodos.util.device.BatteryOptimizationUtils
+import com.junelin.longtermtodos.util.device.DeviceUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
     onManageCategories: () -> Unit,
-    viewModel: SettingsViewModel = viewModel()
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showDaySelector by remember { mutableStateOf(false) }
     var daySelectorType by remember { mutableStateOf<DaySelectorType?>(null) }
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("设置") },
+                title = {
+                    Text(
+                        "设置",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
@@ -69,7 +85,9 @@ fun SettingsScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
         ) {
-            SettingGroup(title = "显示") {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            SettingCard(title = "显示") {
                 SettingItem(
                     title = "锁屏/小组件显示天数",
                     subtitle = "${uiState.widgetDisplayDays} 天",
@@ -88,7 +106,7 @@ fun SettingsScreen(
                 )
             }
 
-            SettingGroup(title = "自动提取") {
+            SettingCard(title = "自动提取") {
                 SettingSwitchItem(
                     title = "短信监听",
                     subtitle = "自动从短信中提取待办事件",
@@ -103,7 +121,7 @@ fun SettingsScreen(
                 )
             }
 
-            SettingGroup(title = "安全") {
+            SettingCard(title = "安全") {
                 SettingSwitchItem(
                     title = "生物识别锁",
                     subtitle = "进入应用时验证指纹或面容",
@@ -112,7 +130,29 @@ fun SettingsScreen(
                 )
             }
 
-            SettingGroup(title = "数据") {
+            if (DeviceUtils.isColorOS()) {
+                SettingCard(title = "设备适配 (${DeviceUtils.getDeviceInfo()})") {
+                    val isIgnoring = BatteryOptimizationUtils.isIgnoringBatteryOptimizations(context)
+                    SettingItem(
+                        title = "忽略电池优化",
+                        subtitle = if (isIgnoring) "已开启" else "点击开启，确保提醒正常运行",
+                        onClick = {
+                            if (!isIgnoring) {
+                                BatteryOptimizationUtils.requestIgnoreBatteryOptimizations(
+                                    context as android.app.Activity
+                                )
+                            }
+                        }
+                    )
+                    SettingItem(
+                        title = "自启动权限",
+                        subtitle = "点击前往系统设置开启",
+                        onClick = { AutoStartUtils.openAutoStartSettings(context) }
+                    )
+                }
+            }
+
+            SettingCard(title = "数据") {
                 SettingItem(
                     title = "分类排序管理",
                     subtitle = "调整分类显示顺序",
@@ -121,14 +161,26 @@ fun SettingsScreen(
                 SettingItem(
                     title = "数据导出",
                     subtitle = "导出为 JSON 备份文件",
-                    onClick = { /* TODO */ }
+                    onClick = {
+                        viewModel.exportData()
+                        // Export is async; in real implementation you'd save to the picked URI
+                    }
                 )
                 SettingItem(
                     title = "数据导入",
                     subtitle = "从 JSON 文件恢复数据",
-                    onClick = { /* TODO */ }
+                    onClick = { /* TODO: implement import picker */ }
                 )
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "远期待办 · LongTerm Todos v2.0.0",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 
@@ -167,18 +219,31 @@ enum class DaySelectorType {
 }
 
 @Composable
-private fun SettingGroup(
+private fun SettingCard(
     title: String,
     content: @Composable () -> Unit
 ) {
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         Text(
             text = title,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.labelLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
         )
-        content()
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        ) {
+            Column {
+                content()
+            }
+        }
     }
 }
 
@@ -192,11 +257,16 @@ private fun SettingItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Medium
+                )
+            )
             if (subtitle != null) {
                 Text(
                     text = subtitle,
@@ -208,7 +278,7 @@ private fun SettingItem(
         Icon(
             imageVector = Icons.Default.ChevronRight,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
         )
     }
 }
@@ -223,11 +293,16 @@ private fun SettingSwitchItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Medium
+                )
+            )
             if (subtitle != null) {
                 Text(
                     text = subtitle,
@@ -257,8 +332,9 @@ private fun DaySelectorDialog(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
                             .clickable { onSelected(option) }
-                            .padding(vertical = 12.dp),
+                            .padding(vertical = 12.dp, horizontal = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
@@ -270,7 +346,9 @@ private fun DaySelectorDialog(
                             Text(
                                 text = "✓",
                                 color = MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.bodyLarge
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = FontWeight.Bold
+                                )
                             )
                         }
                     }

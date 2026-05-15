@@ -40,7 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.junelin.longtermtodos.data.model.Category
 import com.junelin.longtermtodos.ui.category.components.CategoryEditDialog
 
@@ -48,7 +48,7 @@ import com.junelin.longtermtodos.ui.category.components.CategoryEditDialog
 @Composable
 fun CategoryManageScreen(
     onBack: () -> Unit,
-    viewModel: CategoryViewModel = viewModel()
+    viewModel: CategoryViewModel = hiltViewModel()
 ) {
     val categories by viewModel.categories.collectAsState()
     val message by viewModel.message.collectAsState()

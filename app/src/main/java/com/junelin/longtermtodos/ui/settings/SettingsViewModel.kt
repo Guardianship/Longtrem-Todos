@@ -1,16 +1,17 @@
 package com.junelin.longtermtodos.ui.settings
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.junelin.longtermtodos.data.model.Category
 import com.junelin.longtermtodos.data.repository.CategoryRepository
-import com.junelin.longtermtodos.data.repository.SettingsRepository
-import com.junelin.longtermtodos.di.AppModule
+import com.junelin.longtermtodos.domain.usecase.ExportDataUseCase
+import com.junelin.longtermtodos.domain.usecase.GetSettingsUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class SettingsUiState(
     val widgetDisplayDays: Int = 14,
@@ -20,13 +21,16 @@ data class SettingsUiState(
     val biometricLock: Boolean = false,
     val themeColor: String? = null,
     val categories: List<Category> = emptyList(),
-    val message: String? = null
+    val message: String? = null,
+    val exportJson: String? = null
 )
 
-class SettingsViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val settingsRepository = AppModule.provideSettingsRepository(application)
-    private val categoryRepository = AppModule.provideCategoryRepository(application)
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
+    private val getSettingsUseCase: GetSettingsUseCase,
+    private val categoryRepository: CategoryRepository,
+    private val exportDataUseCase: ExportDataUseCase
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState
@@ -34,12 +38,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     init {
         viewModelScope.launch {
             combine(
-                settingsRepository.widgetDisplayDays,
-                settingsRepository.defaultRemindDays,
-                settingsRepository.autoExtractSms,
-                settingsRepository.autoExtractWechat,
-                settingsRepository.biometricLock,
-                settingsRepository.themeColor,
+                getSettingsUseCase.widgetDisplayDays,
+                getSettingsUseCase.defaultRemindDays,
+                getSettingsUseCase.autoExtractSms,
+                getSettingsUseCase.autoExtractWechat,
+                getSettingsUseCase.biometricLock,
+                getSettingsUseCase.themeColor,
                 categoryRepository.getAllCategories()
             ) { values ->
                 @Suppress("UNCHECKED_CAST")
@@ -59,39 +63,27 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun setWidgetDisplayDays(days: Int) {
-        viewModelScope.launch {
-            settingsRepository.setWidgetDisplayDays(days)
-        }
+        viewModelScope.launch { getSettingsUseCase.setWidgetDisplayDays(days) }
     }
 
     fun setDefaultRemindDays(days: Int) {
-        viewModelScope.launch {
-            settingsRepository.setDefaultRemindDays(days)
-        }
+        viewModelScope.launch { getSettingsUseCase.setDefaultRemindDays(days) }
     }
 
     fun setAutoExtractSms(enabled: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.setAutoExtractSms(enabled)
-        }
+        viewModelScope.launch { getSettingsUseCase.setAutoExtractSms(enabled) }
     }
 
     fun setAutoExtractWechat(enabled: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.setAutoExtractWechat(enabled)
-        }
+        viewModelScope.launch { getSettingsUseCase.setAutoExtractWechat(enabled) }
     }
 
     fun setBiometricLock(enabled: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.setBiometricLock(enabled)
-        }
+        viewModelScope.launch { getSettingsUseCase.setBiometricLock(enabled) }
     }
 
     fun setThemeColor(color: String) {
-        viewModelScope.launch {
-            settingsRepository.setThemeColor(color)
-        }
+        viewModelScope.launch { getSettingsUseCase.setThemeColor(color) }
     }
 
     fun updateCategorySort(categories: List<Category>) {
@@ -100,6 +92,21 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 categoryRepository.updateSortOrder(category.id, index)
             }
         }
+    }
+
+    fun exportData() {
+        viewModelScope.launch {
+            try {
+                val json = exportDataUseCase()
+                _uiState.value = _uiState.value.copy(exportJson = json)
+            } catch (e: Exception) {
+                showMessage("导出失败: ${e.message}")
+            }
+        }
+    }
+
+    fun clearExportJson() {
+        _uiState.value = _uiState.value.copy(exportJson = null)
     }
 
     fun showMessage(message: String) {

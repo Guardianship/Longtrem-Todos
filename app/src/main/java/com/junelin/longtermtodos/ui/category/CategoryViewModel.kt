@@ -1,20 +1,21 @@
 package com.junelin.longtermtodos.ui.category
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.junelin.longtermtodos.data.model.Category
 import com.junelin.longtermtodos.data.repository.CategoryRepository
-import com.junelin.longtermtodos.di.AppModule
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class CategoryViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val categoryRepository = AppModule.provideCategoryRepository(application)
+@HiltViewModel
+class CategoryViewModel @Inject constructor(
+    private val categoryRepository: CategoryRepository
+) : ViewModel() {
 
     val categories: StateFlow<List<Category>> = categoryRepository.getAllCategories()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
