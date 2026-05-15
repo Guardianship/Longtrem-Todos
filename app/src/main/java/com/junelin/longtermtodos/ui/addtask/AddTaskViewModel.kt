@@ -2,6 +2,7 @@ package com.junelin.longtermtodos.ui.addtask
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.junelin.longtermtodos.data.model.Category
 import com.junelin.longtermtodos.data.model.Task
@@ -28,8 +29,9 @@ data class AddTaskUiState(
 
 class AddTaskViewModel(
     application: Application,
-    private val taskId: Long? = null
+    private val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
+    private val taskId: Long? = savedStateHandle.get<Long>("taskId").takeIf { it != 0L }
 
     private val taskRepository = AppModule.provideTaskRepository(application)
     private val categoryRepository = AppModule.provideCategoryRepository(application)
