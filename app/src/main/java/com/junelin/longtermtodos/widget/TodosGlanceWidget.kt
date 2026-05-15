@@ -49,16 +49,10 @@ class TodosGlanceWidget : GlanceAppWidget() {
 
 @Composable
 private fun WidgetContent(tasks: List<com.junelin.longtermtodos.data.model.Task>) {
-    val backgroundColor = if (androidx.glance.GlanceTheme.colors.isDark) {
-        androidx.glance.unit.ColorProvider(android.graphics.Color.parseColor("#1C1C1E"))
-    } else {
-        androidx.glance.unit.ColorProvider(android.graphics.Color.parseColor("#F2F2F7"))
-    }
-
     Box(
         modifier = GlanceModifier
             .fillMaxSize()
-            .background(backgroundColor)
+            .background(androidx.glance.GlanceTheme.colors.background)
             .padding(16.dp)
     ) {
         Column {
