@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 
 @Database(
     entities = [TaskEntity::class, CategoryEntity::class, ExtractedEventEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(DateConverters::class)
@@ -40,6 +40,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "longterm_todos.db"
                 )
                     .addCallback(DatabaseCallback())
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

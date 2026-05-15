@@ -23,6 +23,7 @@ data class AddTaskUiState(
     val note: String = "",
     val categoryId: Long? = null,
     val dueDate: LocalDate? = null,
+    val isLunarDate: Boolean = false,
     val remindBeforeDays: Int = 3,
     val isLoading: Boolean = false,
     val isSaved: Boolean = false,
@@ -71,6 +72,7 @@ class AddTaskViewModel(
                     note = it.note ?: "",
                     categoryId = it.categoryId,
                     dueDate = it.dueDate,
+                    isLunarDate = it.isLunarDate,
                     remindBeforeDays = it.remindBeforeDays
                 )
             }
@@ -91,6 +93,10 @@ class AddTaskViewModel(
 
     fun onDueDateChange(date: LocalDate?) {
         _uiState.value = _uiState.value.copy(dueDate = date)
+    }
+
+    fun onLunarToggle(isLunar: Boolean) {
+        _uiState.value = _uiState.value.copy(isLunarDate = isLunar)
     }
 
     fun onRemindDaysChange(days: Int) {
@@ -122,6 +128,7 @@ class AddTaskViewModel(
                 note = state.note.trim().takeIf { it.isNotEmpty() },
                 categoryId = state.categoryId!!,
                 dueDate = state.dueDate!!,
+                isLunarDate = state.isLunarDate,
                 remindBeforeDays = state.remindBeforeDays
             )
             if (taskId != null) {

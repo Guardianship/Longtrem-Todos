@@ -148,6 +148,21 @@ fun TaskCard(
                             }
                         )
 
+                        if (task.isLunarDate) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = "农历",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                            }
+                        }
+
                         // Source tag
                         if (task.source != TaskSource.MANUAL) {
                             SourceTag(source = task.source)

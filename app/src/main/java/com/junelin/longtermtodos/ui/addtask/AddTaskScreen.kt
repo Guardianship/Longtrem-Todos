@@ -112,7 +112,9 @@ fun AddTaskScreen(
             // Due Date
             DatePickerField(
                 selectedDate = uiState.dueDate,
+                isLunar = uiState.isLunarDate,
                 onDateSelected = viewModel::onDueDateChange,
+                onLunarToggle = viewModel::onLunarToggle,
                 label = "到期日期（必选）"
             )
 

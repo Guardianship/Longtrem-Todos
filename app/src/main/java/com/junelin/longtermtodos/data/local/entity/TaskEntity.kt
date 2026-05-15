@@ -26,6 +26,7 @@ data class TaskEntity(
     val dueDate: Long, // LocalDate stored as epochDay
     val remindBeforeDays: Int = 3,
     val isCompleted: Boolean = false,
+    val isLunarDate: Boolean = false,
     val source: String = TaskSource.MANUAL.name,
     val createdAt: Long = System.currentTimeMillis()
 )
