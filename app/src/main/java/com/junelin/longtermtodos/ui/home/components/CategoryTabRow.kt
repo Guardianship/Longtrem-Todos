@@ -82,6 +82,7 @@ private fun CategoryChip(
     )
 }
 
+@Composable
 private fun parseColor(colorString: String): Color {
     return try {
         Color(android.graphics.Color.parseColor(colorString))
