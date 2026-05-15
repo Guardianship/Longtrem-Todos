@@ -11,8 +11,10 @@ import com.junelin.longtermtodos.data.repository.SettingsRepository
 import com.junelin.longtermtodos.data.repository.TaskRepository
 import com.junelin.longtermtodos.di.AppModule
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -40,13 +42,12 @@ class AddTaskViewModel(
     private val _uiState = MutableStateFlow(AddTaskUiState())
     val uiState: StateFlow<AddTaskUiState> = _uiState
 
-    val categories: StateFlow<List<Category>> = MutableStateFlow(emptyList())
+    val categories: StateFlow<List<Category>> = categoryRepository.getAllCategories()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
-        val catState = categories as MutableStateFlow
         viewModelScope.launch {
-            categoryRepository.getAllCategories().collect {
-                catState.value = it
+            categories.collect {
                 if (_uiState.value.categoryId == null && it.isNotEmpty()) {
                     _uiState.value = _uiState.value.copy(categoryId = it.first().id)
                 }

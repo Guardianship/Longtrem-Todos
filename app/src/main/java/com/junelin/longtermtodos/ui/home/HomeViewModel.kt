@@ -5,15 +5,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.junelin.longtermtodos.data.model.Category
 import com.junelin.longtermtodos.data.model.Task
-import com.junelin.longtermtodos.data.repository.CategoryRepository
-import com.junelin.longtermtodos.data.repository.TaskRepository
 import com.junelin.longtermtodos.di.AppModule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -34,9 +33,10 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val _snackbarMessage = MutableStateFlow<String?>(null)
     val snackbarMessage: StateFlow<String?> = _snackbarMessage
 
-    val categories: StateFlow<List<Category>> = MutableStateFlow(emptyList)
+    val categories: StateFlow<List<Category>> = categoryRepository.getAllCategories()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val tasks = combine(
+    val tasks: StateFlow<List<Task>> = combine(
         _selectedCategoryId,
         _searchQuery,
         _isSearchActive
@@ -48,24 +48,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             categoryId == null -> taskRepository.getAllActiveTasks()
             else -> taskRepository.getTasksByCategory(categoryId)
         }
-    }.let { flow ->
-        val state = MutableStateFlow<List<Task>>(emptyList())
-        viewModelScope.launch {
-            flow.collect { state.value = it }
-        }
-        state
-    }
-
-    init {
-        val catState = MutableStateFlow<List<Category>>(emptyList())
-        categories as MutableStateFlow
-        (categories as MutableStateFlow).value = catState.value
-        viewModelScope.launch {
-            categoryRepository.getAllCategories().collect {
-                (categories as MutableStateFlow).value = it
-            }
-        }
-    }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun selectCategory(categoryId: Long?) {
         _selectedCategoryId.value = categoryId
