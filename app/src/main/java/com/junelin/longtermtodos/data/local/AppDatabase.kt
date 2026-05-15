@@ -13,9 +13,7 @@ import com.junelin.longtermtodos.data.local.dao.TaskDao
 import com.junelin.longtermtodos.data.local.entity.CategoryEntity
 import com.junelin.longtermtodos.data.local.entity.ExtractedEventEntity
 import com.junelin.longtermtodos.data.local.entity.TaskEntity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import androidx.room.migration.Migration
 
 @Database(
     entities = [TaskEntity::class, CategoryEntity::class, ExtractedEventEntity::class],
@@ -32,6 +30,12 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE tasks ADD COLUMN isLunarDate INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -40,7 +44,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "longterm_todos.db"
                 )
                     .addCallback(DatabaseCallback())
-                    .fallbackToDestructiveMigration()
+                    .addMigrations(MIGRATION_1_2)
                     .build()
                 INSTANCE = instance
                 instance
@@ -51,49 +55,11 @@ abstract class AppDatabase : RoomDatabase() {
     private class DatabaseCallback : RoomDatabase.Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
-            INSTANCE?.let { database ->
-                CoroutineScope(Dispatchers.IO).launch {
-                    populatePresetCategories(database.categoryDao())
-                }
-            }
-        }
-
-        private suspend fun populatePresetCategories(categoryDao: CategoryDao) {
-            val presets = listOf(
-                CategoryEntity(
-                    id = 1,
-                    name = "生日",
-                    icon = "🎂",
-                    color = "#FF8A80",
-                    sortOrder = 0,
-                    isPreset = true
-                ),
-                CategoryEntity(
-                    id = 2,
-                    name = "汽车",
-                    icon = "🚗",
-                    color = "#80CBC4",
-                    sortOrder = 1,
-                    isPreset = true
-                ),
-                CategoryEntity(
-                    id = 3,
-                    name = "事务",
-                    icon = "📋",
-                    color = "#90CAF9",
-                    sortOrder = 2,
-                    isPreset = true
-                ),
-                CategoryEntity(
-                    id = 4,
-                    name = "衣食住行",
-                    icon = "🏠",
-                    color = "#CE93D8",
-                    sortOrder = 3,
-                    isPreset = true
-                )
-            )
-            categoryDao.insertAll(presets)
+            // 直接使用 SQL 插入预置分类，避免依赖 INSTANCE（此时还未赋值）
+            db.execSQL("INSERT INTO categories (id, name, icon, color, sortOrder, isPreset) VALUES (1, '生日', '🎂', '#FF8A80', 0, 1)")
+            db.execSQL("INSERT INTO categories (id, name, icon, color, sortOrder, isPreset) VALUES (2, '汽车', '🚗', '#80CBC4', 1, 1)")
+            db.execSQL("INSERT INTO categories (id, name, icon, color, sortOrder, isPreset) VALUES (3, '事务', '📋', '#90CAF9', 2, 1)")
+            db.execSQL("INSERT INTO categories (id, name, icon, color, sortOrder, isPreset) VALUES (4, '衣食住行', '🏠', '#CE93D8', 3, 1)")
         }
     }
 }

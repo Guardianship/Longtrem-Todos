@@ -5,12 +5,34 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class LongTermTodosApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        setupCrashHandler()
         createNotificationChannels()
+    }
+
+    private fun setupCrashHandler() {
+        val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            try {
+                val logFile = File(filesDir, "crash_log.txt")
+                val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+                logFile.writeText(
+                    "Crash time: $timestamp\n" +
+                    "Thread: ${thread.name}\n" +
+                    "Exception: ${throwable.javaClass.name}: ${throwable.message}\n" +
+                    "Stack trace:\n${throwable.stackTraceToString()}"
+                )
+            } catch (_: Exception) { }
+            defaultHandler?.uncaughtException(thread, throwable)
+        }
     }
 
     private fun createNotificationChannels() {
