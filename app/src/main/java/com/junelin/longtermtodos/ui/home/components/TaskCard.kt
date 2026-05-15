@@ -1,17 +1,17 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.junelin.longtermtodos.ui.home.components
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.junelin.longtermtodos.data.local.entity.TaskSource
 import com.junelin.longtermtodos.data.model.Task
+import com.junelin.longtermtodos.util.LunarCalendar
 
 @Composable
 fun TaskCard(
@@ -94,83 +95,100 @@ fun TaskCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .height(IntrinsicSize.Min)
             ) {
-                Checkbox(
-                    checked = task.isCompleted,
-                    onCheckedChange = { onToggleComplete() }
+                // Left colored indicator bar
+                Box(
+                    modifier = Modifier
+                        .width(4.dp)
+                        .fillMaxHeight()
+                        .background(categoryColor)
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = task.title,
-                        style = MaterialTheme.typography.bodyLarge,
-                        textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
-                        color = if (task.isCompleted)
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        else
-                            MaterialTheme.colorScheme.onSurface
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = task.isCompleted,
+                        onCheckedChange = { onToggleComplete() }
                     )
 
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = 4.dp)
-                    ) {
-                        // Category color indicator
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(categoryColor)
-                        )
+                    Spacer(modifier = Modifier.width(10.dp))
 
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = task.formattedDueDate,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (task.isOverdue)
-                                MaterialTheme.colorScheme.error
-                            else
+                            text = task.title,
+                            style = MaterialTheme.typography.bodyLarge,
+                            textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
+                            color = if (task.isCompleted)
                                 MaterialTheme.colorScheme.onSurfaceVariant
+                            else
+                                MaterialTheme.colorScheme.onSurface
                         )
 
-                        Text(
-                            text = task.displayDaysLeft,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = when {
-                                task.isCompleted -> MaterialTheme.colorScheme.onSurfaceVariant
-                                task.isOverdue -> MaterialTheme.colorScheme.error
-                                task.daysUntil <= 3 -> MaterialTheme.colorScheme.tertiary
-                                else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(top = 6.dp)
+                        ) {
+                            // Date display
+                            val dateText = if (task.isLunarDate) {
+                                LunarCalendar.solarToLunar(task.dueDate).format()
+                            } else {
+                                task.formattedDueDate
                             }
-                        )
 
-                        if (task.isLunarDate) {
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(MaterialTheme.colorScheme.secondaryContainer)
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
-                            ) {
-                                Text(
-                                    text = "农历",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
+                            Text(
+                                text = dateText,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (task.isOverdue)
+                                    MaterialTheme.colorScheme.error
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+
+                            Text(
+                                text = task.displayDaysLeft,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = when {
+                                    task.isCompleted -> MaterialTheme.colorScheme.onSurfaceVariant
+                                    task.isOverdue -> MaterialTheme.colorScheme.error
+                                    task.daysUntil <= 3 -> MaterialTheme.colorScheme.tertiary
+                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                }
+                            )
+
+                            if (task.isLunarDate) {
+                                TagChip(text = "农历", containerColor = MaterialTheme.colorScheme.secondaryContainer)
                             }
-                        }
 
-                        // Source tag
-                        if (task.source != TaskSource.MANUAL) {
-                            SourceTag(source = task.source)
+                            if (task.source != TaskSource.MANUAL) {
+                                SourceTag(source = task.source)
+                            }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun TagChip(text: String, containerColor: Color) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .background(containerColor)
+            .padding(horizontal = 6.dp, vertical = 2.dp)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSecondaryContainer
+        )
     }
 }
 
