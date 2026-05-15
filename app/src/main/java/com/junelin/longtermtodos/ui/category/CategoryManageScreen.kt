@@ -24,10 +24,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,17 +43,25 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.junelin.longtermtodos.data.model.Category
 import com.junelin.longtermtodos.ui.category.components.CategoryEditDialog
-import com.junelin.longtermtodos.ui.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryManageScreen(
     onBack: () -> Unit,
-    viewModel: SettingsViewModel = viewModel()
+    viewModel: CategoryViewModel = viewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val categories by viewModel.categories.collectAsState()
+    val message by viewModel.message.collectAsState()
     var showEditDialog by remember { mutableStateOf(false) }
     var editingCategory by remember { mutableStateOf<Category?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(message) {
+        message?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearMessage()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -73,7 +84,8 @@ fun CategoryManageScreen(
             }) {
                 Icon(Icons.Default.Add, contentDescription = "添加分类")
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -82,7 +94,7 @@ fun CategoryManageScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(uiState.categories, key = { it.id }) { category ->
+            items(categories, key = { it.id }) { category ->
                 CategoryItem(
                     category = category,
                     onEdit = {
@@ -90,7 +102,7 @@ fun CategoryManageScreen(
                         showEditDialog = true
                     },
                     onDelete = {
-                        // Handle delete via repository if not preset
+                        viewModel.deleteCategory(category)
                     }
                 )
             }
@@ -102,7 +114,11 @@ fun CategoryManageScreen(
             category = editingCategory,
             onDismiss = { showEditDialog = false },
             onSave = { name, icon, color ->
-                // Save via repository
+                if (editingCategory != null) {
+                    viewModel.updateCategory(editingCategory!!.copy(name = name, icon = icon, color = color))
+                } else {
+                    viewModel.addCategory(name, icon, color)
+                }
                 showEditDialog = false
             }
         )
