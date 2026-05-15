@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">远期待办</string>
+    <string name="app_name_en">LongTerm Todos</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">首页</string>
+    <string name="nav_add_task">添加待办</string>
+    <string name="nav_edit_task">编辑待办</string>
+    <string name="nav_settings">设置</string>
+    <string name="nav_categories">分类管理</string>
+
+    <!-- Home -->
+    <string name="tab_all">全部</string>
+    <string name="search_hint">搜索待办标题</string>
+    <string name="empty_tasks_title">暂无待办事项</string>
+    <string name="empty_tasks_desc">点击右下角按钮添加你的第一个远期待办</string>
+    <string name="task_deleted">待办已删除</string>
+    <string name="undo">撤销</string>
+
+    <!-- Task Card -->
+    <string name="days_left">%d天后</string>
+    <string name="due_today">今天到期</string>
+    <string name="overdue">已逾期 %d 天</string>
+    <string name="source_manual">手动</string>
+    <string name="source_sms">短信</string>
+    <string name="source_wechat">微信</string>
+
+    <!-- Add Task -->
+    <string name="title_required">标题（必填）</string>
+    <string name="note_optional">备注（可选）</string>
+    <string name="category">分类</string>
+    <string name="due_date">到期日期</string>
+    <string name="due_date_required">到期日期（必选）</string>
+    <string name="remind_before">提前提醒</string>
+    <string name="remind_days">%d 天</string>
+    <string name="voice_input">语音输入</string>
+    <string name="voice_input_hint">请说出待办事项</string>
+    <string name="save">保存</string>
+    <string name="cancel">取消</string>
+
+    <!-- Extracted Event -->
+    <string name="detected_event">检测到可能的事件</string>
+    <string name="detected_event_desc">"%1$s" 在 %2$s</string>
+    <string name="create_task">创建待办</string>
+    <string name="edit_task">编辑</string>
+    <string name="ignore">忽略</string>
+
+    <!-- Categories -->
+    <string name="category_birthday">生日</string>
+    <string name="category_car">汽车</string>
+    <string name="category_affairs">事务</string>
+    <string name="category_life">衣食住行</string>
+    <string name="add_category">添加分类</string>
+    <string name="edit_category">编辑分类</string>
+    <string name="category_name">分类名称</string>
+    <string name="category_icon">图标</string>
+    <string name="category_color">颜色</string>
+    <string name="delete_category">删除分类</string>
+    <string name="delete_category_confirm">确定删除分类 "%s"？该分类下的任务将移至"全部"。</string>
+    <string name="preset_category_cannot_delete">预置分类不可删除</string>
+
+    <!-- Settings -->
+    <string name="settings">设置</string>
+    <string name="widget_display_days">锁屏/小组件显示天数</string>
+    <string name="default_remind_days">默认提前提醒天数</string>
+    <string name="auto_extract">自动提取</string>
+    <string name="auto_extract_sms">短信监听</string>
+    <string name="auto_extract_wechat">微信通知监听</string>
+    <string name="biometric_lock">生物识别锁</string>
+    <string name="biometric_lock_desc">进入应用时验证指纹或面容</string>
+    <string name="theme_color">主题颜色</string>
+    <string name="category_sort">分类排序管理</string>
+    <string name="data_export">数据导出</string>
+    <string name="data_import">数据导入</string>
+    <string name="export_success">导出成功</string>
+    <string name="import_success">导入成功</string>
+    <string name="days_format">%d 天</string>
+
+    <!-- Notifications -->
+    <string name="channel_reminder_name">到期提醒</string>
+    <string name="channel_reminder_desc">待办事项到期提醒通知</string>
+    <string name="channel_persistent_name">常驻通知</string>
+    <string name="channel_persistent_desc">锁屏和通知栏常驻待办概览</string>
+    <string name="reminder_title">%s 即将到期</string>
+    <string name="reminder_content">将在 %1$d 天后到期（%2$s）</string>
+    <string name="no_upcoming_tasks">暂无近期待办</string>
+    <string name="upcoming_tasks_format">最近待办：%s</string>
+
+    <!-- Permissions -->
+    <string name="permission_sms_title">需要短信读取权限</string>
+    <string name="permission_sms_desc">为了自动从短信中提取待办事件（如年检提醒、生日祝福等），需要读取短信内容。所有处理均在本地完成，不会上传任何数据。</string>
+    <string name="permission_notification_title">需要通知使用权</string>
+    <string name="permission_notification_desc">为了自动从微信通知中提取待办事件，需要监听通知内容。应用仅分析包含日期的消息，所有处理均在本地完成。</string>
+    <string name="permission_microphone_title">需要麦克风权限</string>
+    <string name="permission_microphone_desc">用于语音输入待办标题，录音仅在本地处理。</string>
+    <string name="permission_storage_title">需要存储权限</string>
+    <string name="permission_storage_desc">用于导出和导入备份数据（JSON 格式）。</string>
+    <string name="go_to_settings">前往设置</string>
+
+    <!-- Biometric -->
+    <string name="biometric_prompt_title">验证身份</string>
+    <string name="biometric_prompt_subtitle">请使用指纹或面容解锁</string>
+    <string name="biometric_cancel">取消</string>
+
+    <!-- Common -->
+    <string name="confirm">确定</string>
+    <string name="delete">删除</string>
+    <string name="back">返回</string>
+    <string name="done">完成</string>
+    <string name="error">出错了</string>
+    <string name="retry">重试</string>
+</resources>
