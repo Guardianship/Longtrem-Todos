@@ -11,14 +11,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.DatePicker
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -50,7 +51,13 @@ fun DatePickerField(
 
     val displayText = when {
         selectedDate == null -> "点击选择日期"
-        isLunar -> LunarCalendar.solarToLunar(selectedDate).format()
+        isLunar -> {
+            try {
+                LunarCalendar.solarToLunar(selectedDate).format()
+            } catch (e: Exception) {
+                selectedDate.format(formatter)
+            }
+        }
         else -> selectedDate.format(formatter)
     }
 
@@ -66,7 +73,7 @@ fun DatePickerField(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = label,
                     style = MaterialTheme.typography.bodySmall,
@@ -117,18 +124,21 @@ fun DatePickerField(
     }
 
     if (showDialog) {
+        val initialMillis = selectedDate?.atStartOfDay(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
         val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = selectedDate?.atStartOfDay(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
+            initialSelectedDateMillis = initialMillis,
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    return true
+                }
+                override fun isSelectableYear(year: Int): Boolean {
+                    return year in 1900..2100
+                }
+            }
         )
-        AlertDialog(
+
+        DatePickerDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("选择日期") },
-            text = {
-                DatePicker(
-                    state = datePickerState,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -149,6 +159,8 @@ fun DatePickerField(
                     Text("取消")
                 }
             }
-        )
+        ) {
+            DatePicker(state = datePickerState)
+        }
     }
 }

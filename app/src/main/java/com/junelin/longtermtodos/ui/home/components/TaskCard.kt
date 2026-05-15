@@ -154,7 +154,11 @@ fun TaskCard(
                         ) {
                             // Date display
                             val dateText = if (task.isLunarDate) {
-                                LunarCalendar.solarToLunar(task.dueDate).format()
+                                try {
+                                    LunarCalendar.solarToLunar(task.dueDate).format()
+                                } catch (e: Exception) {
+                                    task.formattedDueDate
+                                }
                             } else {
                                 task.formattedDueDate
                             }
