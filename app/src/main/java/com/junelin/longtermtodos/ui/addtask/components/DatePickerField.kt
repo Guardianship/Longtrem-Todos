@@ -3,6 +3,7 @@ package com.junelin.longtermtodos.ui.addtask.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.junelin.longtermtodos.util.LunarCalendar
 import java.time.Instant
 import java.time.LocalDate
@@ -139,6 +141,9 @@ fun DatePickerField(
 
         DatePickerDialog(
             onDismissRequest = { showDialog = false },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -158,9 +163,18 @@ fun DatePickerField(
                 TextButton(onClick = { showDialog = false }) {
                     Text("取消")
                 }
-            }
+            },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
-            DatePicker(state = datePickerState)
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                DatePicker(
+                    state = datePickerState,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
