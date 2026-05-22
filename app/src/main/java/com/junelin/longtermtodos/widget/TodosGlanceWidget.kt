@@ -128,7 +128,7 @@ private fun WidgetTaskItem(task: com.junelin.longtermtodos.data.model.Task) {
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
+        Spacer(
             modifier = GlanceModifier
                 .width(4.dp)
                 .height(16.dp)
