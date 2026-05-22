@@ -9,7 +9,7 @@ import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import androidx.glance.appwidget.cornerRadius
+import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
@@ -55,7 +55,6 @@ private fun WidgetContent(tasks: List<com.junelin.longtermtodos.data.model.Task>
         modifier = GlanceModifier
             .fillMaxSize()
             .background(GlanceTheme.colors.background)
-            .cornerRadius(16.dp)
             .padding(16.dp)
     ) {
         Column {
@@ -126,13 +125,13 @@ private fun WidgetTaskItem(task: com.junelin.longtermtodos.data.model.Task) {
         modifier = GlanceModifier
             .fillMaxWidth()
             .background(GlanceTheme.colors.surfaceVariant)
-            .cornerRadius(8.dp)
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = GlanceModifier
-                .size(width = 4.dp, height = 16.dp)
+                .width(4.dp)
+                .height(16.dp)
                 .background(
                     when {
                         daysUntil < 0 -> GlanceTheme.colors.error
@@ -140,7 +139,6 @@ private fun WidgetTaskItem(task: com.junelin.longtermtodos.data.model.Task) {
                         else -> GlanceTheme.colors.onSurfaceVariant
                     }
                 )
-                .cornerRadius(2.dp)
         )
         Spacer(modifier = GlanceModifier.width(8.dp))
         Text(
