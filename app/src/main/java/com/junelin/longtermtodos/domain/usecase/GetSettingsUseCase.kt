@@ -13,6 +13,8 @@ class GetSettingsUseCase @Inject constructor(
     val autoExtractWechat: Flow<Boolean> = settingsRepository.autoExtractWechat
     val biometricLock: Flow<Boolean> = settingsRepository.biometricLock
     val themeColor: Flow<String?> = settingsRepository.themeColor
+    val darkMode: Flow<String> = settingsRepository.darkMode
+    val dynamicColor: Flow<Boolean> = settingsRepository.dynamicColor
 
     suspend fun setWidgetDisplayDays(days: Int) = settingsRepository.setWidgetDisplayDays(days)
     suspend fun setDefaultRemindDays(days: Int) = settingsRepository.setDefaultRemindDays(days)
@@ -20,4 +22,6 @@ class GetSettingsUseCase @Inject constructor(
     suspend fun setAutoExtractWechat(enabled: Boolean) = settingsRepository.setAutoExtractWechat(enabled)
     suspend fun setBiometricLock(enabled: Boolean) = settingsRepository.setBiometricLock(enabled)
     suspend fun setThemeColor(color: String) = settingsRepository.setThemeColor(color)
+    suspend fun setDarkMode(mode: String) = settingsRepository.setDarkMode(mode)
+    suspend fun setDynamicColor(enabled: Boolean) = settingsRepository.setDynamicColor(enabled)
 }

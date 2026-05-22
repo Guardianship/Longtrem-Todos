@@ -22,6 +22,8 @@ class SettingsRepository(private val context: Context) {
         val AUTO_EXTRACT_WECHAT = booleanPreferencesKey("auto_extract_wechat")
         val BIOMETRIC_LOCK = booleanPreferencesKey("biometric_lock")
         val THEME_COLOR = stringPreferencesKey("theme_color")
+        val DARK_MODE = stringPreferencesKey("dark_mode")
+        val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
     }
 
     val widgetDisplayDays: Flow<Int> = context.dataStore.data.map { prefs ->
@@ -46,6 +48,14 @@ class SettingsRepository(private val context: Context) {
 
     val themeColor: Flow<String?> = context.dataStore.data.map { prefs ->
         prefs[THEME_COLOR]
+    }
+
+    val darkMode: Flow<String> = context.dataStore.data.map { prefs ->
+        prefs[DARK_MODE] ?: "system"
+    }
+
+    val dynamicColor: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        prefs[DYNAMIC_COLOR] ?: false
     }
 
     suspend fun setWidgetDisplayDays(days: Int) {
@@ -81,6 +91,18 @@ class SettingsRepository(private val context: Context) {
     suspend fun setThemeColor(color: String) {
         context.dataStore.edit { prefs ->
             prefs[THEME_COLOR] = color
+        }
+    }
+
+    suspend fun setDarkMode(mode: String) {
+        context.dataStore.edit { prefs ->
+            prefs[DARK_MODE] = mode
+        }
+    }
+
+    suspend fun setDynamicColor(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[DYNAMIC_COLOR] = enabled
         }
     }
 }
